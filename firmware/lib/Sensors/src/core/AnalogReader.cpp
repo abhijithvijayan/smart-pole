@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "Sensors.h"
 
-#define ANALOG_INPUT_PIN 0
+const int ANALOG_INPUT_PIN = A0;
 
 AnalogReader::AnalogReader(int pin) { this->_pin = pin; }
 

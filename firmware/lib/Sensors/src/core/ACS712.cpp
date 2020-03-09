@@ -29,18 +29,33 @@ void ACS712::calibrate(int calFactor) {
     this->_calFactor = cal;
 }
 
-/**
- *  Get averaged current measurment
- *  n - number of readings to average
- *  Returns - sensed current in Ampere.
- */
-float ACS712::getCurrent(int n) {
-    int rawVal = 0;
+float ACS712::getVPP() {
+    float result;
+    int readValue;       // value read from the sensor
+    int maxValue = 0;    // store max value here
+    int minValue = 1024; // store min value here
 
-    for (int i = 0; i < n; ++i) {
-        delay(100);
-        rawVal += this->read() - this->_calFactor;
+    uint32_t start_time = millis();
+    while ((millis() - start_time) < 1000) // sample for 1 Sec
+    {
+        readValue = this->read();
+
+        // see if you have a new maxValue
+        if (readValue > maxValue) {
+            /*record the maximum sensor value*/
+            maxValue = readValue;
+        }
+
+        if (readValue < minValue) {
+            /*record the minimum sensor value*/
+            minValue = readValue;
+        }
     }
 
-    return 0.0264 * (float(rawVal) / n);
+    // Subtract min from max
+    result = ((maxValue - minValue) * 5.0) / 1024.0;
+
+    return result;
 }
+
+int ACS712::getmVPerAmpValue() { return this->_mVperAmp; }

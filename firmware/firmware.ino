@@ -58,9 +58,6 @@ void setup() {
     // initialize & connect to WiFi
     connectToWifi();
 
-    // Manually calibrate the ACS712 current sensor.
-    // acs712.calibrate();
-
     delay(100);
 }
 
@@ -68,17 +65,20 @@ void loop() {
     if (WiFi.status() == WL_CONNECTED) {
         long now = millis();
 
+        int maxValue = 0;    // store max value here
+        int minValue = 1024; // store min value here
+
         if (now - lastReconnectAttempt > DATA_PUBLISHING_DELAY) {
             lastReconnectAttempt = now;
 
+            double voltage = acs712.getVPP();
+            double VRMS    = (voltage / 2.0) * 0.707; // root 2 is 0.707
+            double AmpsRMS = (VRMS * 1000) / acs712.getmVPerAmpValue();
+
             Serial.println();
             Serial.print("Reading current:");
-
-            // Get averaged current measurment for 10 readings
-            float acs712Currrent = acs712.getCurrent(10);
-
-            Serial.print(acs712Currrent);
-            Serial.println(F(" [mA]"));
+            Serial.print(AmpsRMS);
+            Serial.println(" Amps RMS");
         }
     }
 }
